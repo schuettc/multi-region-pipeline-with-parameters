@@ -29,6 +29,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     '@types/aws-lambda',
     '@aws-sdk/client-sns',
     '@aws-sdk/client-lambda',
+    '@aws-sdk/client-cloudformation',
     'dotenv',
   ],
 });

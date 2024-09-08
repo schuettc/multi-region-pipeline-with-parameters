@@ -50,6 +50,10 @@
       "type": "build"
     },
     {
+      "name": "@aws-sdk/client-cloudformation",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-lambda",
       "type": "runtime"
     },

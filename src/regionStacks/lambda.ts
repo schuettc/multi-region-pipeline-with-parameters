@@ -11,7 +11,6 @@ export class LambdaResources extends Construct {
   constructor(scope: Construct, id: string, topic: ITopic) {
     super(scope, id);
 
-    // Create the Lambda function
     this.lambdaFunction = new NodejsFunction(this, 'SNSGenerator', {
       runtime: Runtime.NODEJS_LATEST,
       handler: 'handler',
@@ -22,7 +21,8 @@ export class LambdaResources extends Construct {
       logRetention: RetentionDays.ONE_WEEK,
     });
 
-    // Subscribe the Lambda to the SNS topic
+    topic.grantPublish(this.lambdaFunction);
+
     topic.addSubscription(new LambdaSubscription(this.lambdaFunction));
   }
 }

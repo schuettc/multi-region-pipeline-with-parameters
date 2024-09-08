@@ -3,25 +3,17 @@ import { PipelineStack } from '.';
 
 const app = new App();
 
-// Function to check if an environment variable is set
-function requireEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Environment variable ${name} is not set`);
-  }
-  return value;
-}
+const pipelineName = 'MultiRegionPipeline';
+const repoOwner = 'schuettc';
+const repoName = 'multi-region-pipeline-with-parameters';
+const repoBranch = 'main';
+const connectionArn = 'arn:aws:codeconnections:sa-east-1:104621577074:connection/a2d7b324-438f-4944-a846-71e160ad9734';
+const accountId = '104621577074';
 
-// Check and get required environment variables
-const pipelineName = requireEnv('PIPELINE_NAME');
-const repoOwner = requireEnv('REPO_OWNER');
-const repoName = requireEnv('REPO_NAME');
-const repoBranch = requireEnv('REPO_BRANCH');
-const connectionArn = requireEnv('CONNECTION_ARN');
 
 new PipelineStack(app, 'MultiRegionPipelineStack', {
   env: {
-    account: requireEnv('ACCOUNT_ID'),
+    account: accountId,
     region: 'us-east-1',
   },
   pipelineConfig: {

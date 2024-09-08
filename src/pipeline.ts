@@ -1,10 +1,4 @@
 import { Stage, Stack, StackProps, StageProps } from 'aws-cdk-lib';
-// import {
-//   Role,
-//   AccountPrincipal,
-//   CompositePrincipal,
-//   ServicePrincipal,
-// } from 'aws-cdk-lib/aws-iam';
 import {
   CodePipeline,
   CodePipelineSource,

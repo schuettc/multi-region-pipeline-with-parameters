@@ -26,7 +26,6 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   defaultReleaseBranch: 'main',
   name: 'multi-region-pipeline',
   deps: [
-    'dotenv',
     '@types/aws-lambda',
     '@aws-sdk/client-sns',
     '@aws-sdk/client-lambda',
@@ -82,6 +81,7 @@ const common_exclude = [
   'yarn-error.log',
   'dependabot.yml',
   '.DS_Store',
+  '.env',
   '**/dist/**',
   '**/bin/**',
   '**/lib/**',

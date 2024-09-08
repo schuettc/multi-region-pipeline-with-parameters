@@ -222,13 +222,13 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --dep=dev,peer,prod,optional --filter=esbuild,eslint-import-resolver-typescript,eslint-plugin-import,projen,ts-node,typescript,@aws-sdk/client-lambda,@aws-sdk/client-sns,@types/aws-lambda,dotenv"
+          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --dep=dev,peer,prod,optional --filter=esbuild,eslint-import-resolver-typescript,eslint-plugin-import,projen,ts-node,typescript,@aws-sdk/client-lambda,@aws-sdk/client-sns,@types/aws-lambda"
         },
         {
           "exec": "yarn install --check-files"
         },
         {
-          "exec": "yarn upgrade @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk esbuild eslint-import-resolver-typescript eslint-plugin-import eslint projen ts-node typescript @aws-sdk/client-lambda @aws-sdk/client-sns @types/aws-lambda aws-cdk-lib constructs dotenv"
+          "exec": "yarn upgrade @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk esbuild eslint-import-resolver-typescript eslint-plugin-import eslint projen ts-node typescript @aws-sdk/client-lambda @aws-sdk/client-sns @types/aws-lambda aws-cdk-lib constructs"
         },
         {
           "exec": "npx projen"

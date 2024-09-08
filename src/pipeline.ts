@@ -1,10 +1,10 @@
 import { Stage, Stack, StackProps, StageProps } from 'aws-cdk-lib';
-import {
-  Role,
-  AccountPrincipal,
-  CompositePrincipal,
-  ServicePrincipal,
-} from 'aws-cdk-lib/aws-iam';
+// import {
+//   Role,
+//   AccountPrincipal,
+//   CompositePrincipal,
+//   ServicePrincipal,
+// } from 'aws-cdk-lib/aws-iam';
 import {
   CodePipeline,
   CodePipelineSource,
@@ -29,15 +29,7 @@ export class PipelineStack extends Stack {
   constructor(scope: Construct, id: string, props: PipelineStackProps) {
     super(scope, id, props);
 
-    const pipelineRole = new Role(this, 'PipelineRole', {
-      assumedBy: new CompositePrincipal(
-        new AccountPrincipal(this.account),
-        new ServicePrincipal('codepipeline.amazonaws.com'),
-      ),
-    });
-
     const pipeline = new CodePipeline(this, 'Pipeline', {
-      role: pipelineRole,
       pipelineName: props.pipelineConfig.pipelineName,
       crossAccountKeys: true,
       synth: new ShellStep('Synth', {

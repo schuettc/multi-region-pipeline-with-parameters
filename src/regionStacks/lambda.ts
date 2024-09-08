@@ -23,6 +23,5 @@ export class LambdaResources extends Construct {
 
     topic.grantPublish(this.lambdaFunction);
 
-    topic.addSubscription(new LambdaSubscription(this.lambdaFunction));
   }
 }

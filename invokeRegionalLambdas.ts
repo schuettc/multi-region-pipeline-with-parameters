@@ -54,11 +54,17 @@ async function invokeAllRegionalLambdas() {
   const regions = getAllRegions();
   console.log('Invoking Lambdas in the following regions:', regions.join(', '));
 
-  for (const region of regions) {
-    await invokeLambda(region);
+  const invocationPromises = regions.map(region => invokeLambda(region));
+
+  try {
+    await Promise.all(invocationPromises);
+    console.log('Finished invoking all regional Lambdas');
+  } catch (error) {
+    console.error('Error invoking regional Lambdas:', error);
   }
 }
 
-invokeAllRegionalLambdas()
-  .then(() => console.log('Finished invoking all regional Lambdas'))
-  .catch((error) => console.error('Error invoking regional Lambdas:', error));
+invokeAllRegionalLambdas().catch(error => {
+  console.error('Unhandled error in invokeAllRegionalLambdas:', error);
+  process.exit(1);
+});

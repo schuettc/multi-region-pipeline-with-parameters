@@ -42,7 +42,11 @@ async function invokeLambda(region: string) {
 
   try {
     const response = await client.send(command);
-    console.log(`Successfully invoked Lambda in ${region}:`, response);
+    const payload = JSON.parse(new TextDecoder().decode(response.Payload));
+    const body = JSON.parse(payload.body);
+    console.log(`Successfully invoked Lambda in ${region}:`);
+    console.log(`  Message ID: ${body.messageId}`);
+    console.log(`  Status Code: ${response.StatusCode}`);
     return response;
   } catch (error) {
     console.error(`Error invoking Lambda in ${region}:`, error);
@@ -53,18 +57,14 @@ async function invokeLambda(region: string) {
 async function invokeAllRegionalLambdas() {
   const regions = getAllRegions();
   console.log('Invoking Lambdas in the following regions:', regions.join(', '));
+  console.log('---');
 
-  const invocationPromises = regions.map(region => invokeLambda(region));
-
-  try {
-    await Promise.all(invocationPromises);
-    console.log('Finished invoking all regional Lambdas');
-  } catch (error) {
-    console.error('Error invoking regional Lambdas:', error);
+  for (const region of regions) {
+    await invokeLambda(region);
+    console.log('---');
   }
 }
 
-invokeAllRegionalLambdas().catch(error => {
-  console.error('Unhandled error in invokeAllRegionalLambdas:', error);
-  process.exit(1);
-});
+invokeAllRegionalLambdas()
+  .then(() => console.log('Finished invoking all regional Lambdas'))
+  .catch((error) => console.error('Error invoking regional Lambdas:', error));

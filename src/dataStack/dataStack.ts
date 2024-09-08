@@ -11,14 +11,14 @@ export class DataStack extends Stack {
     super(scope, id, props);
 
     const snsResources = new SNSResources(this, 'SNSResources');
-    new LambdaResources(this, 'LambdaResources', snsResources.benchmarkErrorTopic);
+    new LambdaResources(this, 'LambdaResources', snsResources.topic);
 
-    new CfnOutput(this, 'TopicArn', { value: snsResources.benchmarkErrorTopic.topicArn });
+    new CfnOutput(this, 'TopicArn', { value: snsResources.topic.topicArn });
 
 
     new StringParameter(this, 'TopicArnParam', {
       parameterName: '/mulit-region-pipeline/topic-arn',
-      stringValue: snsResources.benchmarkErrorTopic.topicArn,
+      stringValue: snsResources.topic.topicArn,
     });
 
 

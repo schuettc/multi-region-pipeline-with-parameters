@@ -1,8 +1,5 @@
 import { App } from 'aws-cdk-lib';
-import { config } from 'dotenv';
 import { PipelineStack } from '.';
-
-config();
 
 const app = new App();
 

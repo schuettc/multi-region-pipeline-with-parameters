@@ -40,6 +40,14 @@ export class PipelineStack extends Stack {
             connectionArn: props.pipelineConfig.connectionArn,
           },
         ),
+        env: {
+          PIPELINE_NAME: props.pipelineConfig.pipelineName,
+          REPO_OWNER: props.pipelineConfig.repoOwner,
+          REPO_NAME: props.pipelineConfig.repoName,
+          REPO_BRANCH: props.pipelineConfig.repoBranch,
+          CONNECTION_ARN: props.pipelineConfig.connectionArn,
+          ACCOUNT_ID: this.account,
+        },
         commands: [
           'yarn install --frozen-lockfile',
           'yarn build',

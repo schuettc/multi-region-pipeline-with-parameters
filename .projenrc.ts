@@ -82,7 +82,6 @@ const common_exclude = [
   'yarn-error.log',
   'dependabot.yml',
   '.DS_Store',
-  '.env',
   '**/dist/**',
   '**/bin/**',
   '**/lib/**',

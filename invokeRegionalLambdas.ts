@@ -12,7 +12,8 @@ if (!account) {
 
 async function invokeLambda(region: string) {
   const client = new LambdaClient({ region });
-  const functionName = `RegionalStage-${region}-RegionStack-SNSGenerator`;
+  const stackName = `RegionalStage-${region}-RegionStack`;
+  const functionName = `${stackName}-LambdaFunctionName`;
 
   const command = new InvokeCommand({
     FunctionName: functionName,

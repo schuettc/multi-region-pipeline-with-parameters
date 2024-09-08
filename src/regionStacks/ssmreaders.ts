@@ -4,37 +4,14 @@ import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from '
 import { Construct } from 'constructs';
 
 export class SSMReaders extends Construct {
-  public readonly firehoseDeliveryStreamArn: string;
-  public readonly errorTopicArn: string;
+  public readonly topicArn: string;
 
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
     const ssmPolicy = new PolicyStatement({
       actions: ['ssm:GetParameter'],
-      resources: [`arn:aws:ssm:us-east-1:${Stack.of(this).account}:parameter/llm-benchmark/*`],
-    });
-
-    const firehoseArnReader = new AwsCustomResource(this, 'FirehoseArnReader', {
-      onCreate: {
-        service: 'SSM',
-        action: 'getParameter',
-        parameters: {
-          Name: '/llm-benchmark/firehose-arn',
-        },
-        region: 'us-east-1',
-        physicalResourceId: PhysicalResourceId.of('FirehoseArnParameter'),
-      },
-      onUpdate: {
-        service: 'SSM',
-        action: 'getParameter',
-        parameters: {
-          Name: '/llm-benchmark/firehose-arn',
-        },
-        region: 'us-east-1',
-        physicalResourceId: PhysicalResourceId.of('FirehoseArnParameter'),
-      },
-      policy: AwsCustomResourcePolicy.fromStatements([ssmPolicy]),
+      resources: [`arn:aws:ssm:us-east-1:${Stack.of(this).account}:parameter/mulit-region-pipeline/*`],
     });
 
     const snsTopicArnReader = new AwsCustomResource(this, 'SNSTopicArnReader', {
@@ -42,24 +19,23 @@ export class SSMReaders extends Construct {
         service: 'SSM',
         action: 'getParameter',
         parameters: {
-          Name: '/llm-benchmark/error-topic-arn',
+          Name: '/mulit-region-pipeline/topic-arn',
         },
         region: 'us-east-1',
-        physicalResourceId: PhysicalResourceId.of('ErrorTopicArnParameter'),
+        physicalResourceId: PhysicalResourceId.of('TopicArnParameter'),
       },
       onUpdate: {
         service: 'SSM',
         action: 'getParameter',
         parameters: {
-          Name: '/llm-benchmark/error-topic-arn',
+          Name: '/mulit-region-pipeline/topic-arn',
         },
         region: 'us-east-1',
-        physicalResourceId: PhysicalResourceId.of('ErrorTopicArnParameter'),
+        physicalResourceId: PhysicalResourceId.of('TopicArnParameter'),
       },
       policy: AwsCustomResourcePolicy.fromStatements([ssmPolicy]),
     });
 
-    this.firehoseDeliveryStreamArn = firehoseArnReader.getResponseField('Parameter.Value');
-    this.errorTopicArn = snsTopicArnReader.getResponseField('Parameter.Value');
+    this.topicArn = snsTopicArnReader.getResponseField('Parameter.Value');
   }
 }

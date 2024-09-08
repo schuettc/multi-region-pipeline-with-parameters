@@ -1,5 +1,5 @@
-import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
 import { CloudFormationClient, DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
+import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
 import * as dotenv from 'dotenv';
 import { getAllRegions } from './src/config/regions';
 

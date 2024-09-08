@@ -12,7 +12,7 @@ export class RegionStack extends Stack {
 
     const ssmReaders = new SSMReaders(this, 'SSMReaders');
 
-    const topic = Topic.fromTopicArn(this, 'ImportedErrorTopic', ssmReaders.errorTopicArn);
+    const topic = Topic.fromTopicArn(this, 'ImportedErrorTopic', ssmReaders.topicArn);
     const lambdaResources = new LambdaResources(this, 'LambdaResources', topic);
 
     new CfnOutput(this, 'LambdaFunctionName', {

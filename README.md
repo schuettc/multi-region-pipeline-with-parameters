@@ -1,90 +1,268 @@
-# LLM Benchmarking: Serverless AWS Implementation
+# Multi-Region Pipeline with AWS CDK
 
-## Overview
+This project implements a multi-region deployment pipeline using AWS CDK. It demonstrates how to create a centralized pipeline that can deploy resources across multiple AWS regions, with a focus on passing parameters between stacks and regions.
 
-This project implements a serverless solution for benchmarking Large Language Models (LLMs) using AWS services. It leverages AWS Batch, Step Functions, S3, Athena, and Glue to orchestrate and analyze performance tests for various LLM models across different regions.
+## Architecture Overview
 
-## System Architecture
+![Architecture Diagram](./images/MultiRegionPipelineOverview.png)
 
-![Architecture Diagram](/images/Overview.png)
+The solution consists of the following main components:
 
-The solution consists of six main components:
+1. **Central Pipeline Stack**: Orchestrates the deployment across multiple regions.
+2. **Data Stack**: Deployed in the primary region (us-east-1) to manage shared resources.
+3. **Regional Stacks**: Deployed in each specified region, containing region-specific resources.
+4. **SNS Topic**: Used for cross-region communication.
+5. **Lambda Functions**: Deployed in each region to demonstrate the multi-region setup.
 
-1. AWS Step Functions: Orchestrates the benchmarking workflow
-2. AWS Batch: Executes benchmarking jobs
-3. Amazon S3: Stores benchmark results
-4. AWS Glue: Defines schema for benchmark data
-5. Amazon Athena: Enables SQL-based analysis of results
-6. Amazon EventBridge: Schedules periodic benchmarking runs
+## Key Features
 
-## Implementation Details
+- **Multi-Region Deployment**: Automatically deploys resources to multiple AWS regions.
+- **Cross-Region Parameter Sharing**: Uses SSM Parameter Store to share information across regions.
+- **Centralized SNS Topic**: Facilitates communication between regional resources.
+- **Dynamic Region Configuration**: Easily add or remove regions from the deployment.
+- **Automated CI/CD**: Uses AWS CodePipeline for continuous integration and deployment.
 
-### 1. AWS Step Functions
+## Prerequisites
 
-Orchestrates the benchmarking workflow, iterating through different model and region configurations. The state machine manages the following steps:
+- AWS Account
+- AWS CLI configured with appropriate credentials
+- Node.js and npm installed
+- AWS CDK CLI installed (`npm install -g aws-cdk`)
 
-- Initializes the benchmarking process
-- Submits AWS Batch jobs for each model and region combination
-- Handles job completion and error scenarios
+## Project Structure
+.
+├── src/
+│ ├── config/
+│ │ └── regions.ts # Region configuration
+│ ├── dataStack/ # Central data stack
+│ ├── regionStacks/ # Regional stack definition
+│ └── pipeline.ts # Main pipeline definition
+├── bootstrapRegions.ts # Script to bootstrap CDK in all regions
+├── invokeRegionalLambdas.ts # Script to test regional Lambdas
+└── .projenrc.ts # Projen configuration
 
-### 2. AWS Batch
-
-Runs benchmarking jobs using a managed EC2 compute environment and job queue. Each job:
-
-- Executes the `llmperf` benchmarking tool against specified Bedrock models
-- Collects performance metrics and stores results in S3
-
-### 3. Amazon S3
-
-Stores benchmark results securely in a designated bucket, organizing data by timestamp, model, and region.
-
-### 4. AWS Glue
-
-Defines the schema for benchmark data using a Glue Database and Table, making it queryable by Athena. The table structure includes:
-
-- Timestamp
-- Model name
-- Region
-- API type (e.g., completion, embedding)
-- Performance metrics (e.g., latency, throughput)
-
-### 5. Amazon Athena
-
-Configures a dedicated workgroup and sample queries for analyzing benchmark data. Users can perform SQL-based analysis on the collected metrics.
-
-### 6. Amazon EventBridge
-
-Triggers the Step Functions state machine periodically, ensuring regular benchmarking runs without manual intervention.
-
-## Benchmarking Process
-
-1. EventBridge rule triggers the Step Functions workflow (or manual initiation).
-2. Step Functions iterates through each model and region configuration:
-   a. Submits an AWS Batch job with specific parameters.
-   b. Job runs `llmperf` against the specified Bedrock model.
-   c. Results are stored in the S3 bucket.
-3. Glue table automatically recognizes new data in S3.
-4. Users query and analyze results using Athena.
 
 ## Deployment
 
-The infrastructure is defined using AWS CDK for version-controlled, reproducible deployments. The main stack is defined in the `LLMBenchmarkingStack` class.
+1. Fork the repository
 
-## Getting Started
+2. Clone your forked repository:
+   ```
+   git clone https://github.com/your-username/multi-region-pipeline.git
+   cd multi-region-pipeline
+   ```
+3. Configure [CodeStar Connection](https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html) with your AWS Account
 
-1. Clone the repository
-2. Install dependencies: `yarn install`
-3. Deploy the stack: `yarn launch`
-4. Trigger the Step Functions state machine manually or wait for the EventBridge rule.
-5. Use Athena to query and analyze results after benchmarks have run.
+4. Update the configuration in `src/multi-region-pipeline.ts` with your information:
 
-## Querying Benchmark Data with Athena
+```typescript
+const pipelineName = 'MultiRegionPipeline';
+const repoOwner = 'schuettc';
+const repoName = 'multi-region-pipeline-with-parameters';
+const repoBranch = 'main';
+const connectionArn = 'arn:aws:codeconnections:sa-east-1:104621577074:connection/a2d7b324-438f-4944-a846-71e160ad9734';
+const accountId = '104621577074';
+```
 
-Use the provided sample query in Athena resources to calculate average metrics for each model, region, and API for the current hour. Example queries might include:
+5. Install dependencies:
+   ```
+   yarn
+   ```
 
-- Comparing latency across different models and regions
-- Analyzing throughput for specific API types
-- Identifying performance trends over time
+6. Bootstrap CDK in all required regions:
+   ```
+   yarn bootstrapRegions
+   ```
+
+7. Build the project:
+   ```
+   yarn build
+   ```
+
+8. Deploy the pipeline:
+   ```
+   yarn launch
+   ```
+
+## How it Works
+
+The regions used in this example are defined in `src/config/regions.ts` file:
+
+```typescript
+  export const multiRegionConfig: RegionConfig[] = [
+    {
+      region: 'us-east-1',
+      services: ['service-a', 'service-b', 'service-c'],
+    },
+    {
+      region: 'us-west-2',
+      services: ['service-a', 'service-b', 'service-c', 'service-d'],
+    },
+  ];
+  ```
+
+## Pipeline
+The pipeline is defined in `src/pipeline.ts` file:
+
+```typescript
+    const pipeline = new CodePipeline(this, 'Pipeline', {
+      pipelineName: props.pipelineConfig.pipelineName,
+      crossAccountKeys: true,
+      synth: new ShellStep('Synth', {
+        input: CodePipelineSource.connection(
+          `${props.pipelineConfig.repoOwner}/${props.pipelineConfig.repoName}`,
+          props.pipelineConfig.repoBranch,
+          {
+            connectionArn: props.pipelineConfig.connectionArn,
+          },
+        ),
+        env: {
+          PIPELINE_NAME: props.pipelineConfig.pipelineName,
+          REPO_OWNER: props.pipelineConfig.repoOwner,
+          REPO_NAME: props.pipelineConfig.repoName,
+          REPO_BRANCH: props.pipelineConfig.repoBranch,
+          CONNECTION_ARN: props.pipelineConfig.connectionArn,
+          ACCOUNT_ID: this.account,
+        },
+        commands: [
+          'yarn install --frozen-lockfile',
+          'yarn build',
+          'npx cdk synth',
+        ],
+      }),
+    });
+```
+
+This provides us the pipeline that we will use to deploy our application.  
+
+## Data Stack
+
+The data stack is deployed in the primary region (us-east-1) and contains resources that are shared across all regions. In this example it contains an SNS Topic that is used to receive events from the regional lambdas.  We then save the ARN of this topic in the SSM Parameter Store, so that we can reference it in the regional stacks. We will add it to the pipeline so that it is deployed to the `us-east-1` region.
+
+
+```typsccript
+    const dataStage = new DataStage(this, 'DataStage', {
+      env: { account: this.account, region: 'us-east-1' },
+    });
+    pipeline.addStage(dataStage);
+```
+
+
+```typescript
+export class DataStack extends Stack {
+  constructor(scope: Construct, id: string, props: StackProps) {
+    super(scope, id, props);
+
+    const snsResources = new SNSResources(this, 'SNSResources');
+    new LambdaResources(this, 'LambdaResources', snsResources.topic);
+
+    new CfnOutput(this, 'TopicArn', { value: snsResources.topic.topicArn });
+
+
+    new StringParameter(this, 'TopicArnParam', {
+      parameterName: '/mulit-region-pipeline/topic-arn',
+      stringValue: snsResources.topic.topicArn,
+    });
+  }
+}
+```
+
+## Regional Stacks
+
+The regional stacks are deployed in each region that we have defined in the `multiRegionConfig` array. They contain the resources that are specific to that region. In this example they contain a Lambda function that sends a message to the SNS topic that is shared across regions.  First, we'll add a wave to our pipeline for the regional deployments.
+
+```typescript
+    const regionalWave = pipeline.addWave('RegionalDeployments');
+
+    getAllRegions().forEach((region) => {
+      const regionalStage = new RegionalStage(this, `RegionalStage-${region}`, {
+        env: { account: this.account, region },
+      });
+      regionalWave.addStage(regionalStage);
+    });
+```
+
+The Stack that is deployed in each region is defined in `src/regionStacks/regionStack.ts` file:
+```typescript
+export class RegionStack extends Stack {
+  constructor(scope: Construct, id: string, _props: StackProps) {
+    super(scope, id, _props);
+
+    const ssmReaders = new SSMReaders(this, 'SSMReaders');
+
+    const topic = Topic.fromTopicArn(this, 'ImportedErrorTopic', ssmReaders.topicArn);
+    const lambdaResources = new LambdaResources(this, 'LambdaResources', topic);
+
+    new CfnOutput(this, 'LambdaFunctionName', {
+      value: lambdaResources.lambdaFunction.functionName,
+      exportName: `${this.stackName}-LambdaFunctionName`,
+    });
+  }
+}
+```
+
+In order to read the parameter from the SSM Parameter Store, we will use a Custom Resource that will read the parameter and return the value to the regional stack. This is defined in `src/regionStacks/ssmReader.ts` file:
+
+```typescript
+    const ssmPolicy = new PolicyStatement({
+      actions: ['ssm:GetParameter'],
+      resources: [`arn:aws:ssm:us-east-1:${Stack.of(this).account}:parameter/mulit-region-pipeline/*`],
+    });
+
+    const snsTopicArnReader = new AwsCustomResource(this, 'SNSTopicArnReader', {
+      onCreate: {
+        service: 'SSM',
+        action: 'getParameter',
+        parameters: {
+          Name: '/mulit-region-pipeline/topic-arn',
+        },
+        region: 'us-east-1',
+        physicalResourceId: PhysicalResourceId.of('TopicArnParameter'),
+      },
+      onUpdate: {
+        service: 'SSM',
+        action: 'getParameter',
+        parameters: {
+          Name: '/mulit-region-pipeline/topic-arn',
+        },
+        region: 'us-east-1',
+        physicalResourceId: PhysicalResourceId.of('TopicArnParameter'),
+      },
+      policy: AwsCustomResourcePolicy.fromStatements([ssmPolicy]),
+    });
+
+    this.topicArn = snsTopicArnReader.getResponseField('Parameter.Value');
+```
+
+This will allow us to read the parameter from the SSM Parameter Store and use it in the regional stack as an environment variable in the Lambda function.
+
+## Testing
+After deployment, you can test the regional Lambda functions using the `invokeRegionalLambdas.ts` script:
+
+```typescript
+    yarn invokeRegionalLambdas
+```
+
+This will invoke the Lambda functions in each region and print the response to the console.
+
+
+This script will invoke the Lambda function in each deployed region and display the results.
+
+## Cross-Region Communication
+
+The project demonstrates cross-region communication using a central SNS topic. Regional Lambdas can publish messages to this topic, which can be consumed by a central Lambda function.
+
+## Cleanup
+
+To remove all deployed resources:
+
+```typescript
+    yarn cdk destroy
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 

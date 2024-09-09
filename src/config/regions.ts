@@ -12,14 +12,6 @@ export interface RegionConfig {
       region: 'us-west-2',
       services: ['service-a', 'service-b', 'service-c', 'service-d'],
     },
-    // {
-    //   region: 'eu-west-1',
-    //   services: ['service-a', 'service-b'],
-    // },
-    // {
-    //   region: 'ap-southeast-1',
-    //   services: ['service-a', 'service-c'],
-    // },
   ];
 
   // Helper function to get services for a specific region

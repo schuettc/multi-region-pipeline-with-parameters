@@ -7,7 +7,7 @@ const pipelineName = 'MultiRegionPipeline';
 const repoOwner = 'schuettc';
 const repoName = 'multi-region-pipeline-with-parameters';
 const repoBranch = 'main';
-const connectionArn = 'arn:aws:codeconnections:sa-east-1:104621577074:connection/a2d7b324-438f-4944-a846-71e160ad9734';
+const connectionArn = 'arn:aws:codeconnections:sa-east-1:104621577074:connection/xxxxxxxxxxxxx';
 const accountId = '104621577074';
 
 

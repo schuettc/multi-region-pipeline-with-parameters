@@ -27,9 +27,9 @@ The solution consists of the following main components:
 - AWS Account
 - AWS CLI configured with appropriate credentials
 - Node.js and npm installed
-- AWS CDK CLI installed (`npm install -g aws-cdk`)
 
 ## Project Structure
+```
 .
 ├── src/
 │ ├── config/
@@ -40,7 +40,7 @@ The solution consists of the following main components:
 ├── bootstrapRegions.ts # Script to bootstrap CDK in all regions
 ├── invokeRegionalLambdas.ts # Script to test regional Lambdas
 └── .projenrc.ts # Projen configuration
-
+```
 
 ## Deployment
 
@@ -60,7 +60,7 @@ const pipelineName = 'MultiRegionPipeline';
 const repoOwner = 'schuettc';
 const repoName = 'multi-region-pipeline-with-parameters';
 const repoBranch = 'main';
-const connectionArn = 'arn:aws:codeconnections:sa-east-1:104621577074:connection/a2d7b324-438f-4944-a846-71e160ad9734';
+const connectionArn = 'arn:aws:codeconnections:sa-east-1:104621577074:connection/xxxxxxxxxxxxx';
 const accountId = '104621577074';
 ```
 
@@ -146,7 +146,7 @@ The data stack is deployed in the primary region (us-east-1) and contains resour
     });
     pipeline.addStage(dataStage);
 ```
-
+The stack is defined in `src/dataStack/dataStack.ts` file:
 
 ```typescript
 export class DataStack extends Stack {
